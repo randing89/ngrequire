@@ -1,6 +1,6 @@
 {
   "name": "ngrequire",
-  "version": "2.0.15",
+  "version": "2.0.16",
   "description": "Analyse AngularJS module dependencies",
   "main": "index.js",
   "scripts": {
