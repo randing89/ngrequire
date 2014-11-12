@@ -1,0 +1,24 @@
+{
+  "name": "ngrequire",
+  "version": "2.0.14",
+  "description": "Analyse AngularJS module dependencies",
+  "main": "index.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "author": "Ran Ding",
+  "license": "Private",
+  "devDependencies": {
+    "chai": "^1.9.2",
+    "fs-extra": "^0.12.0",
+    "gulp": "^3.8.9",
+    "gulp-mocha": "^1.1.1",
+    "gulp-shell": "^0.2.10"
+  },
+  "dependencies": {
+    "falafel": "^0.3.1",
+    "globule": "^0.2.0",
+    "lodash": "^2.4.1",
+    "readdir-recursive": "0.0.4"
+  }
+}
