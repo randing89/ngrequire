@@ -12,8 +12,8 @@ A utility to analyse angular dependencies
 
 ```
 return {
-  success: successedFileList,
-  skipped: skippedFileList
+  success: ['successed file list'],
+  skipped: ['skipped file list (due to caching)']
 }
 ```
 
