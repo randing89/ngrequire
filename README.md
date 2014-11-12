@@ -10,7 +10,7 @@ A utility to analyse angular dependencies
 
 - moduleSourceBase: Glob-like file path array. Should contains all your angular modules, providers etc..
 
-```
+```javascript
 return {
   success: ['successed file list'],
   skipped: ['skipped file list (due to caching)']
@@ -21,7 +21,7 @@ return {
 
 - path: Get file meta for given path
 
-```
+```javascript
 return {
   moduleName: 'Name of the angular module',
   loadedFiles: ['List of required file (if using commonjs way)'],
