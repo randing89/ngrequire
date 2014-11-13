@@ -115,11 +115,13 @@ module.exports = {
                         var baseName = path.basename(file, '.js');
 
                         var expectedProviderNames = [];
-                        expectedProviderNames.push(baseName); // example
-                        expectedProviderNames.push(s.camelCase(baseName));  // Example
-                        expectedProviderNames.push(s.camelCase(baseName) + s.camelCase(metaData.providerTypes[0])); // ExampleController
+                        // like example
+                        expectedProviderNames.push(baseName.toLowerCase());
 
-                        if (expectedProviderNames.indexOf(metaData.namedProviders[0]) === -1) {
+                        // like ExampleController
+                        expectedProviderNames.push((baseName + metaData.providerTypes[0]).toLowerCase());
+
+                        if (expectedProviderNames.indexOf(metaData.namedProviders[0].toLowerCase()) === -1) {
                             throw new Error('Provider "{0}" is not matching file name at {1}'.f(metaData.namedProviders[0], file));
                         }
                     }
