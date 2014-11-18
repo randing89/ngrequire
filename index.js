@@ -197,7 +197,7 @@ module.exports = {
             /*
              * Best effort to parse required file
              */
-            if (!(filePath in meta) && fs.existsSync(filePath)) {
+            if (!(filePath in meta) && path.extname(filePath) === 'js' && fs.existsSync(filePath)) {
                 // attempt to parse file
                 self._parse(filePath);
             }
