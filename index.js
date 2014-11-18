@@ -194,7 +194,10 @@ module.exports = {
              */
             var loadedFileMeta;
 
-            if (!(filePath in meta)) {
+            /*
+             * Best effort to parse required file
+             */
+            if (!(filePath in meta) && fs.existsSync(filePath)) {
                 // attempt to parse file
                 self._parse(filePath);
             }
