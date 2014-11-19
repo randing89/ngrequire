@@ -206,6 +206,7 @@ module.exports = {
                 self._parse(filePath);
             }
 
+
             loadedFileMeta = meta[filePath];
             if (loadedFileMeta) {
                 var isDependency = fileMeta.dependencies.indexOf(loadedFileMeta.moduleName) !== -1;
@@ -247,7 +248,7 @@ module.exports = {
 
         // If still can't find
         if (missingInjectedProviders.length > 0) {
-            throw new Error('Can not find providers "{0}" in {1}'.f(missingInjectedProviders.join(', '), file));
+            console.warn('Can not find provider "{0}" in {1}'.f(missingInjectedProviders.join(', '), file));
         }
 
         // Include modules that user explicit specified
