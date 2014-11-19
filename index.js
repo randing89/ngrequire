@@ -14,7 +14,7 @@ var meta = {};
 // {Provider -> file} mapping for fast lookup
 var providerCache = {};
 
-// {Module name -> file} mapping for fast lookup
+// {Module name -> file[]} mapping for fast lookup
 var moduleCache = {};
 
 // Shared options
@@ -94,6 +94,8 @@ module.exports = {
             if (metaData === false || !metaData.angular) {
                 return skipped.push(file);
             }
+            
+            var moduleName = metaData.moduleName;
 
             // Do not apply naming check on external modules
             if (!externalModulesRegexp.test(file)) {
@@ -102,8 +104,8 @@ module.exports = {
                 if (options.ensureModuleName) {
                     var expectedModuleName = path.dirname(file).replace(/\//g, '.');
 
-                    if (!s.nullOrEmpty(metaData.moduleName) && expectedModuleName.indexOf(metaData.moduleName) === -1) {
-                        throw new Error('Module "{0}" should follow folder path for {1}'.f(metaData.moduleName, file));
+                    if (!s.nullOrEmpty(moduleName) && expectedModuleName.indexOf(moduleName) === -1) {
+                        throw new Error('Module "{0}" should follow folder path for {1}'.f(moduleName, file));
                     }
                 }
 
@@ -131,7 +133,7 @@ module.exports = {
             }
 
             // Add to cache
-            moduleCache[metaData.moduleName] = file;
+            moduleCache[moduleName] = _.union(moduleCache[moduleName] || [], [ file ]);
 
             _.each(metaData.namedProviders, function (namedProvider) {
                 providerCache[namedProvider] = file;
@@ -199,7 +201,7 @@ module.exports = {
             /*
              * Best effort to parse required file
              */
-            if (!(filePath in meta) && path.extname(filePath) === 'js' && fs.existsSync(filePath)) {
+            if (!(filePath in meta) && path.extname(filePath) === '.js' && fs.existsSync(filePath)) {
                 // attempt to parse file
                 self._parse(filePath);
             }
@@ -219,6 +221,7 @@ module.exports = {
                 loadedModules[loadedFileMeta.moduleName] = true;
             }
         });
+
 
         // Find out what is missing
         var missingInjectedProviders = _.difference(fileMeta.injectedProviders, _.keys(loadedProviders));
@@ -251,17 +254,19 @@ module.exports = {
         _.each(fileMeta.dependencies, function (dependency) {
             if (!(dependency in loadedModules)) {
                 // Absolute to relative path
-                var absolutePath = moduleCache[dependency];
+                var absolutePaths = moduleCache[dependency];
 
                 // Only process known modules
-                if (absolutePath) {
-                    var relativePath = helpers.absolutePathToRelative(fileBase, absolutePath);
+                if (absolutePaths) {
+                    _.each(absolutePaths, function (absolutePath) {
+                        var relativePath = helpers.absolutePathToRelative(fileBase, absolutePath);
 
-                    result.push({
-                        providerName: '',
-                        moduleName:   dependency,
-                        path:         absolutePath,
-                        relativePath: relativePath
+                        result.push({
+                            providerName: '',
+                            moduleName:   dependency,
+                            path:         absolutePath,
+                            relativePath: relativePath
+                        });
                     });
                 }
             }
