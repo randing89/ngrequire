@@ -113,6 +113,7 @@ module.exports = {
 
                     } else if (metaData.namedProviders.length === 1 && !s.nullOrEmpty(metaData.namedProviders[0])) {
                         var baseName = path.basename(file, '.js');
+                        var providerName = metaData.namedProviders[0].toLowerCase();
 
                         var expectedProviderNames = [];
                         // like example
@@ -121,7 +122,8 @@ module.exports = {
                         // like ExampleController
                         expectedProviderNames.push((baseName + metaData.providerTypes[0]).toLowerCase());
 
-                        if (expectedProviderNames.indexOf(metaData.namedProviders[0].toLowerCase()) === -1) {
+                        // also skip ones start with $
+                        if (providerName[0] !== '$' && expectedProviderNames.indexOf(providerName) === -1) {
                             throw new Error('Provider "{0}" is not matching file name at {1}'.f(metaData.namedProviders[0], file));
                         }
                     }
