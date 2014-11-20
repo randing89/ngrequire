@@ -51,5 +51,13 @@ module.exports = {
         }
 
         return relativePath;
+    },
+
+    isString: function (obj) {
+        return Object.prototype.toString.call(obj) === '[object String]';
+    },
+
+    isRegexp: function (obj) {
+        return Object.prototype.toString.call(obj) === '[object RegExp]';
     }
 };

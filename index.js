@@ -247,8 +247,28 @@ module.exports = {
         }
 
         // If still can't find
+        if (options.ignoreProviders && options.ignoreProviders.length > 0) {
+            missingInjectedProviders = _.filter(missingInjectedProviders, function (missingInjectedProvider) {
+                var ignore = false;
+
+                _.each(options.ignoreProviders, function (ignoreExpr) {
+                    if (helpers.isString(ignoreExpr)) {
+                        ignore = ignoreExpr === missingInjectedProvider;
+                    }
+
+                    if (helpers.isRegexp(ignoreExpr)) {
+                        ignore = ignoreExpr.test(missingInjectedProvider);
+                    }
+
+                    if (ignore) return false;
+                });
+
+                return !ignore;
+            });
+        }
+
         if (missingInjectedProviders.length > 0) {
-            console.warn('Can not find provider "{0}" in {1}'.f(missingInjectedProviders.join(', '), file));
+            throw new Error('Can not find provider "{0}" in {1}'.f(missingInjectedProviders.join(', '), file));
         }
 
         // Include modules that user explicit specified

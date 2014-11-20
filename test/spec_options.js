@@ -4,6 +4,7 @@ var _ = require('lodash');
 var ngRequire = require('../index');
 
 var fixtures = {
+    simple: './fixtures/simple/a.js',
     valid: './fixtures/followPath/**/allValid.js',
     moduleNameNotValid: './fixtures/followPath/**/moduleNameNotValid.js',
     providerNameNotValid: './fixtures/followPath/**/providerNameNotValid.js',
@@ -59,6 +60,29 @@ describe('Options test', function () {
             });
         } catch (e) {
             expect(e.message).to.match(/in different files/);
+            done();
+        }
+    });
+
+    it('should ignore', function (done) {
+        try {
+            ngRequire.update(fixtures.simple);
+            ngRequire.getMissingDependencies(fixtures.simple);
+        } catch (e) {
+            // Should fail without ignore
+            expect(e.message).to.match(/Can not find provider "b, c"/);
+
+            ngRequire.clean();
+            ngRequire.update(fixtures.simple, {
+                ignoreProviders: [
+                    'b',
+                    /^c/
+                ]
+            });
+
+            // Should be ok
+            ngRequire.getMissingDependencies(fixtures.simple);
+
             done();
         }
     });
