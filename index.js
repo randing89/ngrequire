@@ -115,7 +115,7 @@ module.exports = {
 
                     } else if (metaData.namedProviders.length === 1 && !s.nullOrEmpty(metaData.namedProviders[0])) {
                         var baseName = path.basename(file, '.js');
-                        var providerName = metaData.namedProviders[0].toLowerCase().replace(/\W+/g, '');
+                        var providerName = metaData.namedProviders[0].toLowerCase().replace(/[\-_]+/g, '');
 
                         var expectedProviderNames = [];
                         // like example
