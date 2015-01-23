@@ -275,8 +275,6 @@ module.exports = {
         var self = this;
         var paths = globule.find(patterns);
 
-        console.log(paths);
-
         options = _.extend(options, updateOptions);
 
         return self._update(paths);
