@@ -1,8 +1,8 @@
 #ngrequire
 
+[![Build Status](https://travis-ci.org/randing89/ngrequire.svg)](https://travis-ci.org/randing89/ngrequire)
+
 A utility to analyse angular dependencies
-
-
 
 #Usage
 
