@@ -23,8 +23,6 @@ describe('Multiple with existing DI test case', function () {
         _.each(folders, function (value, key) {
             folders[key] = path.resolve(__dirname, value);
         });
-
-        console.log(fs.readdirSync(path.resolve(__dirname, './fixtures')));
     });
 
     afterEach(function () {
