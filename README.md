@@ -1,6 +1,7 @@
 #ngrequire
 
 [![Build Status](https://travis-ci.org/randing89/ngrequire.svg)](https://travis-ci.org/randing89/ngrequire)
+[![Coverage Status](https://coveralls.io/repos/randing89/ngrequire/badge.svg?branch=master)](https://coveralls.io/r/randing89/ngrequire?branch=master)
 
 A utility to analyse angular dependencies
 
