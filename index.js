@@ -11,10 +11,10 @@ var parser = require('./src/parser');
 // {File path -> meta} mapping
 var meta = {};
 
-// {Provider -> file} mapping for fast lookup
+// {Provider -> [file]} mapping for fast lookup
 var providerCache = {};
 
-// {Module name -> file} mapping for fast lookup
+// {Module name -> file[]} mapping for fast lookup
 var moduleCache = {};
 
 // Shared options
@@ -95,6 +95,8 @@ module.exports = {
                 return skipped.push(file);
             }
 
+            var moduleName = metaData.moduleName;
+
             // Do not apply naming check on external modules
             if (!externalModulesRegexp.test(file)) {
 
@@ -102,8 +104,8 @@ module.exports = {
                 if (options.ensureModuleName) {
                     var expectedModuleName = path.dirname(file).replace(/\//g, '.');
 
-                    if (!s.nullOrEmpty(metaData.moduleName) && expectedModuleName.indexOf(metaData.moduleName) === -1) {
-                        throw new Error('Module "{0}" should follow folder path for {1}'.f(metaData.moduleName, file));
+                    if (!s.nullOrEmpty(moduleName) && expectedModuleName.indexOf(moduleName) === -1) {
+                        throw new Error('Module "{0}" should follow folder path for {1}'.f(moduleName, file));
                     }
                 }
 
@@ -113,6 +115,7 @@ module.exports = {
 
                     } else if (metaData.namedProviders.length === 1 && !s.nullOrEmpty(metaData.namedProviders[0])) {
                         var baseName = path.basename(file, '.js');
+                        var providerName = metaData.namedProviders[0].toLowerCase().replace(/[\-_]+/g, '');
 
                         var expectedProviderNames = [];
                         // like example
@@ -121,7 +124,8 @@ module.exports = {
                         // like ExampleController
                         expectedProviderNames.push((baseName + metaData.providerTypes[0]).toLowerCase());
 
-                        if (expectedProviderNames.indexOf(metaData.namedProviders[0].toLowerCase()) === -1) {
+                        // also skip ones start with $
+                        if (providerName[0] !== '$' && expectedProviderNames.indexOf(providerName) === -1) {
                             throw new Error('Provider "{0}" is not matching file name at {1}'.f(metaData.namedProviders[0], file));
                         }
                     }
@@ -129,10 +133,11 @@ module.exports = {
             }
 
             // Add to cache
-            moduleCache[metaData.moduleName] = file;
+            moduleCache[moduleName] = _.union(moduleCache[moduleName] || [], [ file ]);
 
             _.each(metaData.namedProviders, function (namedProvider) {
-                providerCache[namedProvider] = file;
+                providerCache[namedProvider] = providerCache[namedProvider] || [];
+                providerCache[namedProvider].push(file);
             });
 
             success.push(file);
@@ -194,10 +199,14 @@ module.exports = {
              */
             var loadedFileMeta;
 
-            if (!(filePath in meta)) {
+            /*
+             * Best effort to parse required file
+             */
+            if (!(filePath in meta) && path.extname(filePath) === '.js' && fs.existsSync(filePath)) {
                 // attempt to parse file
                 self._parse(filePath);
             }
+
 
             loadedFileMeta = meta[filePath];
             if (loadedFileMeta) {
@@ -215,6 +224,7 @@ module.exports = {
             }
         });
 
+
         // Find out what is missing
         var missingInjectedProviders = _.difference(fileMeta.injectedProviders, _.keys(loadedProviders));
 
@@ -225,38 +235,73 @@ module.exports = {
                 missingInjectedProviders.splice(i, 1);
 
                 // Absolute to relative path
-                var absolutePath = providerCache[provider];
-                var relativePath = helpers.absolutePathToRelative(fileBase, absolutePath);
+                var absolutePaths = providerCache[provider];
+                var availableChoices = _.transform(absolutePaths, function (result, absolutePath) {
+                    result.push({
+                        path: absolutePath,
+                        relativePath: helpers.absolutePathToRelative(fileBase, absolutePath)
+                    });
+                });
 
+                // Sort relative path from shortest to longest
+                availableChoices.sort(function (pathA, pathB) {
+                    return pathA.relativePath.length - pathB.relativePath.length;
+                });
+
+                var choice = availableChoices[0];
+
+                // Use the shortest one
                 result.push({
                     providerName: provider,
-                    moduleName: meta[providerCache[provider]].moduleName,
-                    path: absolutePath,
-                    relativePath: relativePath
+                    moduleName: meta[choice.path].moduleName,
+                    path: choice.path,
+                    relativePath: choice.relativePath
                 });
             }
         }
 
         // If still can't find
+        if (options.ignoreProviders && options.ignoreProviders.length > 0) {
+            missingInjectedProviders = _.filter(missingInjectedProviders, function (missingInjectedProvider) {
+                var ignore = false;
+
+                _.each(options.ignoreProviders, function (ignoreExpr) {
+                    if (helpers.isString(ignoreExpr)) {
+                        ignore = ignoreExpr === missingInjectedProvider;
+                    }
+
+                    if (helpers.isRegexp(ignoreExpr)) {
+                        ignore = ignoreExpr.test(missingInjectedProvider);
+                    }
+
+                    if (ignore) return false;
+                });
+
+                return !ignore;
+            });
+        }
+
         if (missingInjectedProviders.length > 0) {
-            throw new Error('Can not find providers "{0}" in {1}'.f(missingInjectedProviders.join(', '), file));
+            throw new Error('Can not find provider "{0}" in {1}'.f(missingInjectedProviders.join(', '), file));
         }
 
         // Include modules that user explicit specified
         _.each(fileMeta.dependencies, function (dependency) {
             if (!(dependency in loadedModules)) {
                 // Absolute to relative path
-                var absolutePath = moduleCache[dependency];
+                var absolutePaths = moduleCache[dependency];
 
                 // Only process known modules
-                if (absolutePath) {
-                    var relativePath = helpers.absolutePathToRelative(fileBase, absolutePath);
+                if (absolutePaths) {
+                    _.each(absolutePaths, function (absolutePath) {
+                        var relativePath = helpers.absolutePathToRelative(fileBase, absolutePath);
 
-                    result.push({
-                        providerName: '',
-                        moduleName:   dependency,
-                        path:         absolutePath,
-                        relativePath: relativePath
+                        result.push({
+                            providerName: '',
+                            moduleName:   dependency,
+                            path:         absolutePath,
+                            relativePath: relativePath
+                        });
                     });
                 }
             }
