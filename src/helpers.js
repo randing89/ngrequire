@@ -23,8 +23,9 @@ module.exports = {
                     result.push(element.value);
 
                 } else if (element.type === 'FunctionExpression') {
-                    _.each(self.extractDependency(methodName, element), function (name) {
-                        if (!name.startsWith('$')) {
+                    _.each(self.extractDependency(methodName, element), function (name, index) {
+                        // Skip first N arguments
+                        if (index >= result.length && !name.startsWith('$')) {
                             result.push(name);
                         }
                     });
