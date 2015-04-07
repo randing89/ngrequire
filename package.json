@@ -8,8 +8,7 @@
     "url": "https://github.com/randing89/ngrequire"
   },
   "scripts": {
-    "postinstall": "npm install -g istanbul",
-    "test": "istanbul cover ./node_modules/mocha/bin/_mocha ./test/**/spec*.js --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    "test": "./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha ./test/**/spec*.js --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "author": "Ran Ding",
   "license": "MIT",
@@ -19,6 +18,7 @@
     "fs-extra": "^0.16.3",
     "gulp": "^3.8.9",
     "gulp-shell": "^0.2.10",
+    "istanbul": "^0.3.13",
     "mocha": "^2.1.0",
     "mocha-lcov-reporter": "0.0.1"
   },
