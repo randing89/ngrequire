@@ -67,7 +67,11 @@ module.exports = {
                 var line = node.loc.start.line;
 
                 if (methodName === 'require') {
-                    loadedFiles = _.union(loadedFiles, [ helpers.extractLiteral(methodName, node.arguments[0]) ]);
+                    var path = helpers.extractLiteral(methodName, node.arguments[0]);
+
+                    if (path) {
+                        loadedFiles = _.union(loadedFiles, [ path ]);
+                    }
 
                 } else {
                     // Check if the callee object is angular

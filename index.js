@@ -181,7 +181,7 @@ module.exports = {
         _.map(fileMeta.loadedFiles, function (relativePath) {
             // Check if the path is actually path
             // Webpack may have many fancy stuff like require('bundle?a')
-            if (illegalPathCharRegexp.test(relativePath) || !relativePath.startsWith('.')) {
+            if (!relativePath || illegalPathCharRegexp.test(relativePath) || !relativePath.startsWith('.')) {
                 return;
             }
 
